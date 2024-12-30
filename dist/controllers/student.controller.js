@@ -10,7 +10,9 @@ export const getStudentProfile = async (req, res) => {
         // Fetch student details
         const student = await User.findById(studentId).select("-password"); // Exclude password from the response
         if (!student) {
-            return res.status(404).json({ success: false, message: "Student not found" });
+            return res
+                .status(404)
+                .json({ success: false, message: "Student not found" });
         }
         return res.status(200).json({
             success: true,
@@ -35,7 +37,7 @@ export const getStudentCourseStatistics = async (req, res) => {
         const courses = await Course.find({ students: studentId });
         // Return total courses and completed courses
         const totalCourses = courses.length;
-        const completedCourses = courses.filter(course => course.status === 'completed').length; // No more TypeScript error
+        const completedCourses = courses.filter((course) => course.status === "completed").length; // No more TypeScript error
         return res.status(200).json({
             success: true,
             statistics: {
@@ -59,8 +61,7 @@ export const getStudentComplaints = async (req, res) => {
     const studentId = req.user?._id; // The authenticated student's ID
     try {
         // Get all complaints made by this student
-        const complaints = await Complaint.find({ student: studentId })
-            .populate("courseId", "title courseCode");
+        const complaints = await Complaint.find({ student: studentId }).populate("courseId", "title courseCode");
         return res.status(200).json({
             success: true,
             complaints,
@@ -84,7 +85,9 @@ export const updateStudentProfile = async (req, res) => {
         // Find the student by ID
         const student = await User.findById(studentId);
         if (!student) {
-            return res.status(404).json({ success: false, message: "Student not found" });
+            return res
+                .status(404)
+                .json({ success: false, message: "Student not found" });
         }
         // Update student details (excluding password)
         student.firstName = firstName || student.firstName;
@@ -122,13 +125,13 @@ export const getStudentDashboardData = async (req, res) => {
             dashboardData: {
                 totalCourses: courses.length,
                 totalComplaints: complaints.length,
-                courses: courses.map(course => ({
+                courses: courses.map((course) => ({
                     courseId: course._id,
                     courseTitle: course.title,
                     courseCode: course.courseCode,
                     courseStatus: course.status, // Access the status field
                 })),
-                complaints: complaints.map(complaint => ({
+                complaints: complaints.map((complaint) => ({
                     complaintId: complaint._id,
                     description: complaint.description,
                     status: complaint.status,
@@ -154,12 +157,16 @@ export const changeStudentPassword = async (req, res) => {
         // Fetch the student's current data
         const student = await User.findById(studentId);
         if (!student) {
-            return res.status(404).json({ success: false, message: "Student not found" });
+            return res
+                .status(404)
+                .json({ success: false, message: "Student not found" });
         }
         // Check if the current password matches the one in the database
         const isPasswordValid = await bcrypt.compare(currentPassword, student.password);
         if (!isPasswordValid) {
-            return res.status(400).json({ success: false, message: "Current password is incorrect" });
+            return res
+                .status(400)
+                .json({ success: false, message: "Current password is incorrect" });
         }
         // Hash the new password
         const hashedNewPassword = await bcrypt.hash(newPassword, 10);

@@ -7,23 +7,40 @@ export const createComplaint = async (req, res) => {
         const { description, type } = req.body;
         const studentId = req.user?._id;
         if (!description || description.trim().length === 0) {
-            return res.status(400).json({ success: false, message: "Description is required" });
+            return res
+                .status(400)
+                .json({ success: false, message: "Description is required" });
         }
-        if (!type || !["Enroll", "Withdraw", "Completion", "Other"].includes(type)) {
-            return res.status(400).json({ success: false, message: "Invalid complaint type" });
+        if (!type ||
+            !["Enroll", "Withdraw", "Completion", "Other"].includes(type)) {
+            return res
+                .status(400)
+                .json({ success: false, message: "Invalid complaint type" });
         }
         if (!studentId) {
-            return res.status(401).json({ success: false, message: "Authentication required" });
+            return res
+                .status(401)
+                .json({ success: false, message: "Authentication required" });
         }
-        const student = await User.findById(studentId).select("firstName lastName role").lean();
+        const student = await User.findById(studentId)
+            .select("firstName lastName role")
+            .lean();
         if (!student || student.role !== "student") {
-            return res.status(403).json({ success: false, message: "Only students can create complaints" });
+            return res
+                .status(403)
+                .json({
+                success: false,
+                message: "Only students can create complaints",
+            });
         }
         const newComplaint = await Complaint.create({
             student: studentId,
             description: description.trim(),
             type,
-            studentDetails: { firstName: student.firstName, lastName: student.lastName },
+            studentDetails: {
+                firstName: student.firstName,
+                lastName: student.lastName,
+            },
         });
         return res.status(201).json({
             success: true,
@@ -88,12 +105,16 @@ export const updateComplaint = async (req, res) => {
         // Find the complaint by ID
         const complaint = await Complaint.findById(id);
         if (!complaint) {
-            return res.status(404).json({ success: false, message: "Complaint not found" });
+            return res
+                .status(404)
+                .json({ success: false, message: "Complaint not found" });
         }
         // Apply updates
         if (description) {
             if (description.trim().length === 0) {
-                return res.status(400).json({ success: false, message: "Description cannot be empty" });
+                return res
+                    .status(400)
+                    .json({ success: false, message: "Description cannot be empty" });
             }
             complaint.description = description.trim();
         }
@@ -102,7 +123,9 @@ export const updateComplaint = async (req, res) => {
         }
         if (type) {
             if (!["Enroll", "Withdraw", "Completion", "Other", "All"].includes(type)) {
-                return res.status(400).json({ success: false, message: "Invalid complaint type" });
+                return res
+                    .status(400)
+                    .json({ success: false, message: "Invalid complaint type" });
             }
             complaint.type = type;
         }
@@ -125,9 +148,13 @@ export const deleteComplaint = async (req, res) => {
     try {
         const complaint = await Complaint.findByIdAndDelete(id);
         if (!complaint) {
-            return res.status(404).json({ success: false, message: "Complaint not found" });
+            return res
+                .status(404)
+                .json({ success: false, message: "Complaint not found" });
         }
-        res.status(200).json({ success: true, message: "Complaint deleted successfully" });
+        res
+            .status(200)
+            .json({ success: true, message: "Complaint deleted successfully" });
     }
     catch (error) {
         if (error instanceof Error) {

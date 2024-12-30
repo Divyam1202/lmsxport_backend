@@ -13,7 +13,7 @@ import { createComplaint, getStudentComplaints, updateComplaint, deleteStudentCo
 // import { getMessPhoto } from "../controllers/mess.controller.js";
 // Configure multer for profile photos
 // const profileUpload = configureMulter("profile_photos");
-import { viewCourses, withdrawFromCourse, viewEnrolledCourses, playCourse } from "../controllers/course.controller.js";
+import { viewCourses, withdrawFromCourse, viewEnrolledCourses, playCourse, } from "../controllers/course.controller.js";
 const router = express.Router();
 // Student profile routes
 router.get("/profile", authenticateToken, authorizeRoles(["student"]), getStudentProfile);
@@ -52,7 +52,12 @@ authenticateToken, authorizeRoles(["student"]), updateComplaint);
 router.delete("/complaints/:id", // Changed from complaint/:id
 authenticateToken, authorizeRoles(["student"]), deleteStudentComplaint);
 // Profile picture upload route
-router.post("/upload-profile-pic", authenticateToken, authorizeRoles(["student"]));
+router.post("/upload-profile-pic", authenticateToken, authorizeRoles(["student"])
+// profileUpload.single("profilePic"), // Use the configured profileUpload middleware
+// uploadProfilePicture
+);
 //mess-controls
-router.get("/mess-menu", authenticateToken, authorizeRoles(["student"]));
+router.get("/mess-menu", authenticateToken, authorizeRoles(["student"])
+// getMessPhoto
+);
 export default router;

@@ -6,7 +6,9 @@ export const login = async (req, res) => {
         const { email, password } = req.body;
         // Validate input
         if (!email || !password) {
-            return res.status(400).json({ message: "Email and password are required" });
+            return res
+                .status(400)
+                .json({ message: "Email and password are required" });
         }
         // Find user
         const user = await User.findOne({ email });
@@ -40,7 +42,7 @@ export const login = async (req, res) => {
 };
 export const register = async (req, res) => {
     try {
-        const { email, password, username, firstName, lastName, role, portfolioUrl, bio, skills } = req.body;
+        const { email, password, username, firstName, lastName, role, portfolioUrl, bio, skills, } = req.body;
         // Check if user exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {

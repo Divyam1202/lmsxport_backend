@@ -4,7 +4,11 @@ const courseSchema = new mongoose.Schema({
     description: { type: String, required: true },
     courseCode: { type: String, required: true },
     capacity: { type: Number, required: true },
-    instructor: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    instructor: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+    },
     students: [{ type: mongoose.Types.ObjectId, ref: "User" }],
     status: { type: String, required: true, default: "active" },
     modules: [
@@ -17,7 +21,7 @@ const courseSchema = new mongoose.Schema({
         {
             student: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
             progress: { type: Number, default: 0 }, // Default progress is 0%
-            lastPlayedModule: { type: mongoose.Schema.Types.ObjectId, ref: 'Module' }
+            lastPlayedModule: { type: mongoose.Schema.Types.ObjectId, ref: "Module" },
         },
     ],
 });

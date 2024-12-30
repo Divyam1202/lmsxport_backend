@@ -1,4 +1,4 @@
-import express from 'express'; // Ensure you're importing express only once
+import express from "express"; // Ensure you're importing express only once
 import { authenticateToken, authorizeRoles, } from "../middleware/auth.middleware.js";
 import { createAdmin, getAllInstructors, createInstructor, deleteInstructor, getAllStudents, } from "../controllers/admin.controller.js";
 import { getAllPortfolios } from "../controllers/portfolio.controller.js";

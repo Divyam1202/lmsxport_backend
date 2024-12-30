@@ -1,6 +1,6 @@
 import express from "express";
 import { login, register } from "../controllers/auth.controller.js";
-import { authenticateToken, authorizeRoles } from "../middleware/auth.middleware.js";
+import { authenticateToken, authorizeRoles, } from "../middleware/auth.middleware.js";
 const router = express.Router();
 // Public routes
 router.post("/login", login);
