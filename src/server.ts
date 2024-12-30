@@ -46,9 +46,9 @@ mongoose
 app.use(
   (
     err: any,
-    req: express.Request,
+    _req: express.Request,
     res: express.Response,
-    next: express.NextFunction
+    _next: express.NextFunction
   ) => {
     console.error(err.stack);
     res.status(500).json({ message: "Something went wrong!" });
@@ -61,8 +61,7 @@ app.put("/api/portfolio", (req, res) => {
   res.json({ message: "Portfolio saved successfully!" });
 });
 
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
+const PORT = parseInt(process.env.PORT || "5000", 10);
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server is running on port ${PORT}`);
 });
