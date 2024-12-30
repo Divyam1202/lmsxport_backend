@@ -12,10 +12,14 @@ export const getInstructorProfile = async (req: Request, res: Response) => {
 
   try {
     // Fetch instructor details
-    const instructor = await User.findById(instructorId).select("-password").lean(); // Exclude password from the response
+    const instructor = await User.findById(instructorId)
+      .select("-password")
+      .lean(); // Exclude password from the response
 
     if (!instructor) {
-      return res.status(404).json({ success: false, message: "Instructor not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Instructor not found" });
     }
 
     return res.status(200).json({
@@ -39,13 +43,21 @@ export const getComplaintStatistics = async (req: Request, res: Response) => {
 
   try {
     // Get total complaints handled by the instructor
-    const totalComplaints = await Complaint.countDocuments({ handledBy: instructorId }).lean();
+    const totalComplaints = await Complaint.countDocuments({
+      handledBy: instructorId,
+    }).lean();
 
     // Get total complaints resolved by the instructor
-    const resolvedComplaints = await Complaint.countDocuments({ handledBy: instructorId, status: "resolved" }).lean();
+    const resolvedComplaints = await Complaint.countDocuments({
+      handledBy: instructorId,
+      status: "resolved",
+    }).lean();
 
     // Get total complaints pending
-    const pendingComplaints = await Complaint.countDocuments({ handledBy: instructorId, status: "pending" }).lean();
+    const pendingComplaints = await Complaint.countDocuments({
+      handledBy: instructorId,
+      status: "pending",
+    }).lean();
 
     return res.status(200).json({
       success: true,
@@ -89,7 +101,10 @@ export const getAllComplaints = async (req: Request, res: Response) => {
 };
 
 // Get Instructor Dashboard Data (Summary of courses, student count, etc.)
-export const getInstructorDashboardData = async (req: Request, res: Response) => {
+export const getInstructorDashboardData = async (
+  req: Request,
+  res: Response
+) => {
   const instructorId = req.user?._id; // The authenticated instructor's ID
 
   try {
@@ -130,13 +145,20 @@ export const changeInstructorPassword = async (req: Request, res: Response) => {
     // Fetch the instructor's current data
     const instructor = await User.findById(instructorId);
     if (!instructor) {
-      return res.status(404).json({ success: false, message: "Instructor not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Instructor not found" });
     }
 
     // Check if the current password matches the one in the database
-    const isPasswordValid = await bcrypt.compare(currentPassword, instructor.password);
+    const isPasswordValid = await bcrypt.compare(
+      currentPassword,
+      instructor.password
+    );
     if (!isPasswordValid) {
-      return res.status(400).json({ success: false, message: "Current password is incorrect" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Current password is incorrect" });
     }
 
     // Hash the new password

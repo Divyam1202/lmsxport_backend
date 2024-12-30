@@ -5,7 +5,9 @@ import {
   viewEnrolledCourses,
   createCourse,
   viewTeacherCourses,
-  withdrawFromCourse
+  withdrawFromCourse,
+  playCourse,
+  updateProgress
 } from "../controllers/course.controller.js";
 import { authenticateToken } from "../middleware/auth.middleware.js";
 
@@ -26,6 +28,11 @@ router.post("/enroll", authenticateToken, enrollInCourse);
 // Route to withdraw from a course (Student can withdraw from courses)
 router.delete("/withdraw", authenticateToken, withdrawFromCourse);
 
+// Route to Play Course
+router.post("/play/:courseId", authenticateToken, playCourse);
+
+// Route to Show Progress of Course
+router.put("/progress", authenticateToken, updateProgress);
 
 // ===================== Teacher Routes =====================
 

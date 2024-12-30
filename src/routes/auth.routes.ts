@@ -1,24 +1,22 @@
-// import express from "express";
-// import { login, register } from "../controllers/auth.controller.js";
-// import { authorize } from "../middleware/auth.middleware.js
-
-// const router = express.Router();
-
-// router.post("/login", login);
-// router.post("/register", register);
-// // router.post('/parent/login', parentLogin);
-
-// export default router;
-
 import express from "express";
 import { login, register } from "../controllers/auth.controller.js";
-import { authenticateToken, authorizeRoles } from "../middleware/auth.middleware.js";
+import {
+  authenticateToken,
+  authorizeRoles,
+} from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
 // Public routes
 router.post("/login", login);
 router.post("/register", register);
+
+//////////////////////////////
+// router.post("/login", login);
+// router.post("/register", register);
+// router.post('/parent/login', parentLogin);
+// router.post('/parent/register', parentRegister);
+//////////////////////////////
 
 // Protected routes for specific roles
 router.get(
@@ -45,6 +43,15 @@ router.get(
   authorizeRoles(["instructor"]),
   (req, res) => {
     res.json({ message: "Welcome, Instructor!" });
+  }
+);
+
+router.get(
+  "/protected-portfolio",
+  authenticateToken,
+  authorizeRoles(["portfolio"]),
+  (req, res) => {
+    res.json({ message: "Welcome, Portfolio User!" });
   }
 );
 

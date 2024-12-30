@@ -9,7 +9,10 @@ import {
   changeInstructorPassword,
 } from "../controllers/instructor.controller.js";
 
-import { getComplaints, getStudentComplaints } from "../controllers/Complaints.controller.js";
+import {
+  getComplaints,
+  updateComplaint,
+} from "../controllers/Complaints.controller.js";
 
 const router = express.Router();
 
@@ -62,14 +65,6 @@ router.get(
 //   authorizeRoles(["instructor"]),
 //   getAllLeaves
 // );
-
-router.get(
-  "/complaint",
-  authenticateToken,
-  authorizeRoles(["instructor"]),
-  getComplaints
-);
-
 // router.post(
 //   "/leaves/:leaveId/review",
 //   authenticateToken,
@@ -80,10 +75,17 @@ router.get(
 
 // Complaint stats route
 router.get(
-  "/complaint/students",
+  "/complaints",
   authenticateToken,
   authorizeRoles(["instructor"]),
-  getStudentComplaints
+  getComplaints
+);
+
+router.patch(
+  "/update-complaint/:id",
+  authenticateToken,
+  authorizeRoles(["instructor"]),
+  updateComplaint
 );
 
 // Mess-related routes (currently commented out)

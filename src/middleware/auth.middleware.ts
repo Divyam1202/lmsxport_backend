@@ -19,6 +19,7 @@ declare global {
   }
 }
 
+// Middleware to authenticate the JWT token
 export const authenticateToken = (
   req: Request,
   res: Response,
@@ -48,6 +49,7 @@ export const authenticateToken = (
   }
 };
 
+// Middleware to authorize specific roles
 export const authorizeRoles = (roles: string[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
@@ -60,4 +62,27 @@ export const authorizeRoles = (roles: string[]) => {
 
     next();
   };
+};
+
+// Middleware to authorize based on portfolio ownership
+export const authorizePortfolioOwnership = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const { userId } = req.params;
+    if (req.user._id !== userId && req.user.role !== "admin") {
+      return res.status(403).json({ message: "Forbidden: Access denied" });
+    }
+
+    next();
+  } catch (error) {
+    console.error("Authorization error:", error);
+    res.status(500).json({ message: "Authorization failed" });
+  }
 };

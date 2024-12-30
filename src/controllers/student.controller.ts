@@ -15,7 +15,9 @@ export const getStudentProfile = async (req: Request, res: Response) => {
     const student = await User.findById(studentId).select("-password"); // Exclude password from the response
 
     if (!student) {
-      return res.status(404).json({ success: false, message: "Student not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Student not found" });
     }
 
     return res.status(200).json({
@@ -34,7 +36,10 @@ export const getStudentProfile = async (req: Request, res: Response) => {
 // ================== Student’s Course Statistics ==================
 
 // Get Student’s Course Statistics
-export const getStudentCourseStatistics = async (req: Request, res: Response) => {
+export const getStudentCourseStatistics = async (
+  req: Request,
+  res: Response
+) => {
   const studentId = req.user?._id; // The authenticated student's ID
 
   try {
@@ -43,7 +48,9 @@ export const getStudentCourseStatistics = async (req: Request, res: Response) =>
 
     // Return total courses and completed courses
     const totalCourses = courses.length;
-    const completedCourses = courses.filter(course => course.status === 'completed').length;  // No more TypeScript error
+    const completedCourses = courses.filter(
+      (course) => course.status === "completed"
+    ).length; // No more TypeScript error
 
     return res.status(200).json({
       success: true,
@@ -61,8 +68,6 @@ export const getStudentCourseStatistics = async (req: Request, res: Response) =>
   }
 };
 
-
-
 // ================== Student Complaints ==================
 
 // Get Student's Complaints
@@ -71,8 +76,10 @@ export const getStudentComplaints = async (req: Request, res: Response) => {
 
   try {
     // Get all complaints made by this student
-    const complaints = await Complaint.find({ student: studentId })
-      .populate("courseId", "title courseCode")
+    const complaints = await Complaint.find({ student: studentId }).populate(
+      "courseId",
+      "title courseCode"
+    );
 
     return res.status(200).json({
       success: true,
@@ -98,7 +105,9 @@ export const updateStudentProfile = async (req: Request, res: Response) => {
     // Find the student by ID
     const student = await User.findById(studentId);
     if (!student) {
-      return res.status(404).json({ success: false, message: "Student not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Student not found" });
     }
 
     // Update student details (excluding password)
@@ -142,13 +151,13 @@ export const getStudentDashboardData = async (req: Request, res: Response) => {
       dashboardData: {
         totalCourses: courses.length,
         totalComplaints: complaints.length,
-        courses: courses.map(course => ({
+        courses: courses.map((course) => ({
           courseId: course._id,
           courseTitle: course.title,
           courseCode: course.courseCode,
-          courseStatus: course.status,  // Access the status field
+          courseStatus: course.status, // Access the status field
         })),
-        complaints: complaints.map(complaint => ({
+        complaints: complaints.map((complaint) => ({
           complaintId: complaint._id,
           description: complaint.description,
           status: complaint.status,
@@ -164,7 +173,6 @@ export const getStudentDashboardData = async (req: Request, res: Response) => {
   }
 };
 
-
 // ================== Student Password Change ==================
 
 // Student Password Change
@@ -176,13 +184,20 @@ export const changeStudentPassword = async (req: Request, res: Response) => {
     // Fetch the student's current data
     const student = await User.findById(studentId);
     if (!student) {
-      return res.status(404).json({ success: false, message: "Student not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Student not found" });
     }
 
     // Check if the current password matches the one in the database
-    const isPasswordValid = await bcrypt.compare(currentPassword, student.password);
+    const isPasswordValid = await bcrypt.compare(
+      currentPassword,
+      student.password
+    );
     if (!isPasswordValid) {
-      return res.status(400).json({ success: false, message: "Current password is incorrect" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Current password is incorrect" });
     }
 
     // Hash the new password

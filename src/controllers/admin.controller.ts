@@ -36,9 +36,16 @@ export const createAdmin = async (req: Request, res: Response) => {
     });
   } catch (error: unknown) {
     if (error instanceof Error) {
-      res.status(500).json({ message: "Failed to create admin user", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to create admin user", error: error.message });
     } else {
-      res.status(500).json({ message: "Failed to create admin user", error: "Unknown error" });
+      res
+        .status(500)
+        .json({
+          message: "Failed to create admin user",
+          error: "Unknown error",
+        });
     }
   }
 };
@@ -77,14 +84,16 @@ export const createStudent = async (req: Request, res: Response) => {
     });
   } catch (error) {
     if (error instanceof Error) {
-      res.status(500).json({ message: "Failed to create student", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to create student", error: error.message });
     } else {
-      res.status(500).json({ message: "Failed to create student", error: "Unknown error" });
+      res
+        .status(500)
+        .json({ message: "Failed to create student", error: "Unknown error" });
     }
   }
 };
-
-
 
 // Get student profile info
 export const getStudentProfileInfo = async (req: Request, res: Response) => {
@@ -100,15 +109,25 @@ export const getStudentProfileInfo = async (req: Request, res: Response) => {
     res.status(200).json({ student });
   } catch (error) {
     if (error instanceof Error) {
-      res.status(500).json({ message: "Error fetching student profile", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Error fetching student profile",
+          error: error.message,
+        });
     } else {
-      res.status(500).json({ message: "Error fetching student profile", error: "Unknown error" });
+      res
+        .status(500)
+        .json({
+          message: "Error fetching student profile",
+          error: "Unknown error",
+        });
     }
   }
 };
 
 // Get all students
-export const getAllStudents = async (req: Request, res: Response) => {
+export const getAllStudents = async (_req: Request, res: Response) => {
   try {
     const students = await User.find({ role: "student" })
       .select("firstName lastName email")
@@ -117,9 +136,13 @@ export const getAllStudents = async (req: Request, res: Response) => {
     res.status(200).json(students);
   } catch (error: unknown) {
     if (error instanceof Error) {
-      res.status(500).json({ message: "Error fetching students", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Error fetching students", error: error.message });
     } else {
-      res.status(500).json({ message: "Error fetching students", error: "Unknown error" });
+      res
+        .status(500)
+        .json({ message: "Error fetching students", error: "Unknown error" });
     }
   }
 };
@@ -140,9 +163,13 @@ export const deleteStudent = async (req: Request, res: Response) => {
     res.status(200).json({ message: "Student deleted successfully" });
   } catch (error) {
     if (error instanceof Error) {
-      res.status(500).json({ message: "Error deleting student", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Error deleting student", error: error.message });
     } else {
-      res.status(500).json({ message: "Error deleting student", error: "Unknown error" });
+      res
+        .status(500)
+        .json({ message: "Error deleting student", error: "Unknown error" });
     }
   }
 };
@@ -153,7 +180,9 @@ export const assignCourseToStudent = async (req: Request, res: Response) => {
     const { studentId, courseId } = req.body;
 
     if (!studentId || !courseId) {
-      return res.status(400).json({ message: "Student ID and Course ID are required" });
+      return res
+        .status(400)
+        .json({ message: "Student ID and Course ID are required" });
     }
 
     const student = await User.findById(studentId);
@@ -176,9 +205,19 @@ export const assignCourseToStudent = async (req: Request, res: Response) => {
     res.status(200).json({ message: "Course assigned successfully", student });
   } catch (error: unknown) {
     if (error instanceof Error) {
-      res.status(500).json({ message: "Error assigning course to student", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Error assigning course to student",
+          error: error.message,
+        });
     } else {
-      res.status(500).json({ message: "Error assigning course to student", error: "Unknown error" });
+      res
+        .status(500)
+        .json({
+          message: "Error assigning course to student",
+          error: "Unknown error",
+        });
     }
   }
 };
@@ -189,7 +228,9 @@ export const removeCourseFromStudent = async (req: Request, res: Response) => {
     const { studentId, courseId } = req.body;
 
     if (!studentId || !courseId) {
-      return res.status(400).json({ message: "Student ID and Course ID are required" });
+      return res
+        .status(400)
+        .json({ message: "Student ID and Course ID are required" });
     }
 
     const student = await User.findById(studentId);
@@ -198,15 +239,26 @@ export const removeCourseFromStudent = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Student not found" });
     }
 
-    student.courses = student.courses?.filter((course: string) => course !== courseId) ?? [];
+    student.courses =
+      student.courses?.filter((course) => course.toString() !== courseId) ?? [];
     await student.save();
 
     res.status(200).json({ message: "Course removed successfully", student });
   } catch (error: unknown) {
     if (error instanceof Error) {
-      res.status(500).json({ message: "Error removing course from student", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Error removing course from student",
+          error: error.message,
+        });
     } else {
-      res.status(500).json({ message: "Error removing course from student", error: "Unknown error" });
+      res
+        .status(500)
+        .json({
+          message: "Error removing course from student",
+          error: "Unknown error",
+        });
     }
   }
 };
@@ -239,15 +291,19 @@ export const createInstructor = async (req: Request, res: Response) => {
     });
   } catch (error) {
     if (error instanceof Error) {
-      res.status(500).json({ message: "Error creating instructor", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Error creating instructor", error: error.message });
     } else {
-      res.status(500).json({ message: "Error creating instructor", error: "Unknown error" });
+      res
+        .status(500)
+        .json({ message: "Error creating instructor", error: "Unknown error" });
     }
   }
 };
 
 // Get all instructors
-export const getAllInstructors = async (req: Request, res: Response) => {
+export const getAllInstructors = async (_req: Request, res: Response) => {
   try {
     const instructors = await User.find({ role: "instructor" })
       .select("firstName lastName email")
@@ -260,15 +316,22 @@ export const getAllInstructors = async (req: Request, res: Response) => {
     res.status(200).json(instructors);
   } catch (error) {
     if (error instanceof Error) {
-      res.status(500).json({ message: "Error fetching instructors", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Error fetching instructors", error: error.message });
     } else {
-      res.status(500).json({ message: "Error fetching instructors", error: "Unknown error" });
+      res
+        .status(500)
+        .json({
+          message: "Error fetching instructors",
+          error: "Unknown error",
+        });
     }
   }
 };
 
 // Get all courses
-export const getAllCourses = async (req: Request, res: Response) => {
+export const getAllCourses = async (_req: Request, res: Response) => {
   try {
     const courses = await Course.find()
       .select("name description instructor")
@@ -282,9 +345,13 @@ export const getAllCourses = async (req: Request, res: Response) => {
     res.status(200).json(courses);
   } catch (error) {
     if (error instanceof Error) {
-      res.status(500).json({ message: "Error fetching courses", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Error fetching courses", error: error.message });
     } else {
-      res.status(500).json({ message: "Error fetching courses", error: "Unknown error" });
+      res
+        .status(500)
+        .json({ message: "Error fetching courses", error: "Unknown error" });
     }
   }
 };
@@ -314,42 +381,52 @@ export const deleteInstructor = async (req: Request, res: Response) => {
     res.status(200).json({ message: "Instructor deleted successfully" });
   } catch (error) {
     if (error instanceof Error) {
-      res.status(500).json({ message: "Error deleting instructor", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Error deleting instructor", error: error.message });
     } else {
-      res.status(500).json({ message: "Error deleting instructor", error: "Unknown error" });
+      res
+        .status(500)
+        .json({ message: "Error deleting instructor", error: "Unknown error" });
     }
   }
 };
 
-
-
 // Create a new course (Instructor action)
 export const createCourseByInstructor = async (req: Request, res: Response) => {
   try {
-    const { instructorId } = req.params;  // Instructor's ID
+    const { instructorId } = req.params; // Instructor's ID
     const { name, description } = req.body;
 
     // Check if instructor exists
     const instructor = await User.findById(instructorId);
     if (!instructor || instructor.role !== "instructor") {
-      return res.status(404).json({ message: "Instructor not found or unauthorized" });
+      return res
+        .status(404)
+        .json({ message: "Instructor not found or unauthorized" });
     }
 
     // Create the new course
     const newCourse = new Course({
       name,
       description,
-      instructor: instructorId,  // Assign course to instructor
+      instructor: instructorId, // Assign course to instructor
     });
 
     await newCourse.save();
 
-    res.status(201).json({ message: "Course created successfully", course: newCourse });
+    res
+      .status(201)
+      .json({ message: "Course created successfully", course: newCourse });
   } catch (error) {
     if (error instanceof Error) {
-      res.status(500).json({ message: "Error creating course", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Error creating course", error: error.message });
     } else {
-      res.status(500).json({ message: "Error creating course", error: "Unknown error" });
+      res
+        .status(500)
+        .json({ message: "Error creating course", error: "Unknown error" });
     }
   }
 };

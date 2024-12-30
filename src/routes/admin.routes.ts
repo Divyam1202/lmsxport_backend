@@ -1,4 +1,4 @@
-import express from 'express';  // Ensure you're importing express only once
+import express from "express"; // Ensure you're importing express only once
 import {
   authenticateToken,
   authorizeRoles,
@@ -10,6 +10,7 @@ import {
   deleteInstructor,
   getAllStudents,
 } from "../controllers/admin.controller.js";
+import { getAllPortfolios } from "../controllers/portfolio.controller.js";
 import { getAllComplaints } from "../controllers/instructor.controller.js";
 
 const router = express.Router();
@@ -27,6 +28,9 @@ router.get("/students", getAllStudents);
 router.get("/getAllInstructors", getAllInstructors);
 router.post("/instructor-create", createInstructor);
 router.delete("/delete-instructor/:id", deleteInstructor);
+
+//Portfolio User Management
+router.get("/portfolio", getAllPortfolios);
 
 // Complaint Management
 router.get("/getallcomplaints", getAllComplaints);

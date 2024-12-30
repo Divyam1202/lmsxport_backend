@@ -1,21 +1,25 @@
-import mongoose, { Schema, Document} from "mongoose";
-import bcrypt from "bcryptjs"; // Correct default import of bcryptjs
+import mongoose, { Schema, Document } from "mongoose";
+import bcrypt from "bcryptjs";
 
-// Define the interface for User document, which extends mongoose.Document
+// Define the interface for the User document
 export interface IUser extends mongoose.Document {
   email: string;
   password: string;
+  username: string;
   firstName: string;
   lastName: string;
-  role: "admin" | "student" | "instructor";
-  courses?: string[];
+  role: "admin" | "student" | "instructor" | "portfolio";
   phoneNumber?: string;
-  // educationLevel: "Select Education Level" | "High School" | "Bachelor's Degree" | "Master's Degree" | "Ph.D." | "Other";
-  // areaOfInterest: string[];
-  comparePassword(candidatePassword: string): Promise<boolean>;
+  portfolioUrl?: string; // Portfolio URL
+  about?: string; // Brief introduction
+  skills?: string[]; // Array of skills
+  portfolio?: mongoose.Types.ObjectId; // Reference to the Portfolio model
+  courses: mongoose.Types.ObjectId[]; // Courses field, referencing Course model
+  comparePassword(candidatePassword: string): Promise<boolean>; // Compare passwords method
 }
-// Define the user schema
-const userSchema = new mongoose.Schema<IUser>(
+
+// Define the User schema
+const userSchema: Schema<IUser> = new mongoose.Schema(
   {
     email: {
       type: String,
@@ -25,6 +29,10 @@ const userSchema = new mongoose.Schema<IUser>(
       lowercase: true,
     },
     password: {
+      type: String,
+      required: true,
+    },
+    username: {
       type: String,
       required: true,
     },
@@ -38,46 +46,39 @@ const userSchema = new mongoose.Schema<IUser>(
     },
     role: {
       type: String,
-      enum: ["admin", "student", "instructor"],
+      enum: ["admin", "student", "instructor", "portfolio"],
       required: true,
       default: "student",
     },
-    // educationLevel: {
-    //   type: String,
-    //   enum: ["Select Education Level", "High School", "Bachelor's Degree", "Master's Degree", "Ph.D.", "Other"],
-    //   required: true,
-    //   default: "Select Education Level",
-    // },
-    // areaOfInterest: {
-    //   type: [String],
-    //   enum: [
-    //     "Web Development",
-    //     "Data Science",
-    //     "Mobile Development",
-    //     "AI/ML",
-    //     "Business",
-    //     "Design",
-    //     "Marketing",
-    //   ],
-    //   required: true,
-    //   default: [],
-    //   validate: {
-    //     validator: function (value: string[]): boolean {
-    //       return value.length > 0; // Ensure at least one selection
-    //     },
-    //     message: "You must select at least one area of interest.",
-    //   },
-    // },
-    
+    phoneNumber: {
+      type: String,
+      default: null,
+    },
+    portfolioUrl: {
+      type: String,
+      unique: true,
+      sparse: true, // Allow null or undefined, enforce uniqueness when present
+    },
+    about: {
+      type: String,
+      maxlength: 500, // Brief introduction
+    },
+    skills: {
+      type: [String],
+      default: [],
+    },
+    portfolio: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Portfolio", // Reference to the Portfolio model
+    },
+    courses: [{ type: mongoose.Types.ObjectId, ref: "Course" }], // Add courses field
   },
   {
-    timestamps: true,
+    timestamps: true, // Automatically adds createdAt and updatedAt fields
   }
 );
 
-
-
-// Hash password before saving
+// Hash the password before saving the User
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
@@ -90,47 +91,84 @@ userSchema.pre("save", async function (next) {
   }
 });
 
-// Method to compare passwords
+// Compare candidate password with hashed password
 userSchema.methods.comparePassword = async function (
   candidatePassword: string
 ): Promise<boolean> {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-// Export the models
+// Export the User model
 export const User = mongoose.model<IUser>("User", userSchema);
 
+export interface IPortfolio extends Document {
+  username: string;
+  displayName: string;
+  skills: string[];
+  experience: {
+    title: string;
+    company: string;
+    location: string;
+    startDate: string;
+    endDate: string;
+    description: string;
+  }[];
+  projects: {
+    name: string;
+    description: string;
+    technologies: string[];
+    link: string;
+  }[];
+  education: {
+    institution: string;
+    degree: string;
+    graduationYear: string;
+    major: string;
+  }[];
+  published: boolean;
+  portfolioUrl?: string;
+  bio?: string;
+  about?: string;
+  patentsOrPapers?: string[];
+  profileLinks?: string[];
+}
 
-// // In your course model
-// interface ICourse extends Document {
-//   title: string;
-//   description: string;
-//   courseCode: string;
-//   instructor: string; // Could be an ObjectId, depending on your model
-//   students: Schema.Types.ObjectId[];  // Array of student ObjectIds
-//   status: string; // This should include the 'status' property
-//   capacity: number;
-// }
-// // Define the course schema
-// const courseSchema = new mongoose.Schema<ICourse>({
-//   title: {
-//     type: String,
-//     required: true,
-//   },
-//   courseCode: {
-//     type: String,
-//     required: true,
-//   },
-//   students: [
-//     {
-//       type: mongoose.Schema.Types.ObjectId,
-//       ref: "User",
-//     },
-//   ],
-//   status: {
-//     type: String,
-//     required: true,
-//     status: { type: String, enum: ['ongoing', 'completed'], default: 'ongoing' },
-//   },
-// });
-// export const Course = mongoose.model<ICourse>("Course", courseSchema);
+const PortfolioSchema: Schema = new Schema({
+  username: { type: String, required: true, unique: true },
+  displayName: { type: String, required: true },
+  skills: { type: [String], required: true },
+  experience: [
+    {
+      title: { type: String, required: true },
+      company: { type: String, required: true },
+      location: { type: String, required: true },
+      startDate: { type: String, required: true },
+      endDate: { type: String },
+      description: { type: String, required: true },
+    },
+  ],
+  projects: [
+    {
+      name: { type: String, required: true },
+      description: { type: String, required: true },
+      technologies: { type: [String], required: true },
+      link: { type: String, required: true },
+    },
+  ],
+  education: [
+    {
+      institution: { type: String, required: true },
+      degree: { type: String, required: true },
+      graduationYear: { type: String, required: true },
+      major: { type: String, required: true },
+    },
+  ],
+  published: { type: Boolean, default: false },
+  portfolioUrl: { type: String },
+  bio: { type: String },
+  about: { type: String },
+  patentsOrPapers: { type: [String] },
+  profileLinks: { type: [String] },
+});
+
+export default mongoose.model<IPortfolio>("Portfolio", PortfolioSchema);

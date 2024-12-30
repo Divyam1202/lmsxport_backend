@@ -1,5 +1,16 @@
 import mongoose, { Document } from "mongoose";
 
+interface Module {
+  title: string;
+  resourceLink: string;
+}
+
+interface ProgressEntry {
+  student: mongoose.Types.ObjectId; // Correcting the ObjectId type here
+  progress: number; // Percentage progress
+  lastPlayedModule?: string | null; // Optional last played module
+}
+
 // Define the interface for the Course model
 export interface ICourse extends Document {
   title: string;
@@ -10,6 +21,17 @@ export interface ICourse extends Document {
   students: mongoose.Schema.Types.ObjectId[]; // Array of student IDs
   status: string;
   modules: { title: string; resourceLink: string }[]; // Array of modules
+  progress: ProgressEntry[];
+}
+
+interface PlayCourseResponse {
+  success: boolean;
+  message: string;
+  course?: {
+    title: string;
+    description: string;
+    modules: { title: string; resourceLink: string }[];
+  };
 }
 
 const courseSchema = new mongoose.Schema<ICourse>({
@@ -17,14 +39,24 @@ const courseSchema = new mongoose.Schema<ICourse>({
   description: { type: String, required: true },
   courseCode: { type: String, required: true },
   capacity: { type: Number, required: true },
-  instructor: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  // students: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  instructor: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
   students: [{ type: mongoose.Types.ObjectId, ref: "User" }],
   status: { type: String, required: true, default: "active" },
   modules: [
     {
       title: { type: String, required: true },
       resourceLink: { type: String, required: true },
+    },
+  ],
+  progress: [
+    {
+      student: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      progress: { type: Number, default: 0 }, // Default progress is 0%
+      lastPlayedModule: { type: mongoose.Schema.Types.ObjectId, ref: "Module" },
     },
   ],
 });

@@ -10,27 +10,46 @@ export const createComplaint = async (req: Request, res: Response) => {
     const studentId = req.user?._id;
 
     if (!description || description.trim().length === 0) {
-      return res.status(400).json({ success: false, message: "Description is required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Description is required" });
     }
 
-    if (!type || !["Enroll", "Withdraw", "Completion","Other"].includes(type)) {
-      return res.status(400).json({ success: false, message: "Invalid complaint type" });
+    if (
+      !type ||
+      !["Enroll", "Withdraw", "Completion", "Other"].includes(type)
+    ) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid complaint type" });
     }
 
     if (!studentId) {
-      return res.status(401).json({ success: false, message: "Authentication required" });
+      return res
+        .status(401)
+        .json({ success: false, message: "Authentication required" });
     }
 
-    const student = await User.findById(studentId).select("firstName lastName role").lean();
+    const student = await User.findById(studentId)
+      .select("firstName lastName role")
+      .lean();
     if (!student || student.role !== "student") {
-      return res.status(403).json({ success: false, message: "Only students can create complaints" });
+      return res
+        .status(403)
+        .json({
+          success: false,
+          message: "Only students can create complaints",
+        });
     }
 
     const newComplaint = await Complaint.create({
       student: studentId,
       description: description.trim(),
       type,
-      studentDetails: { firstName: student.firstName, lastName: student.lastName },
+      studentDetails: {
+        firstName: student.firstName,
+        lastName: student.lastName,
+      },
     });
 
     return res.status(201).json({
@@ -45,7 +64,7 @@ export const createComplaint = async (req: Request, res: Response) => {
         updatedAt: newComplaint.updatedAt,
       },
     });
-  }catch (error) {
+  } catch (error) {
     console.error("Create complaint error:", error);
     return res.status(500).json({
       success: false,
@@ -91,22 +110,26 @@ export const getComplaints = async (req: Request, res: Response) => {
   }
 };
 
-
 // Update Complaint (Student)
 export const updateComplaint = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const { description, status, type } = req.body;
-  const studentId = req.user?._id;
+  const { id } = req.params; // Extract complaint ID from the route
+  const { description, status, type } = req.body; // Extract updates from the request body
 
   try {
-    const complaint = await Complaint.findOne({ _id: id, student: studentId });
+    // Find the complaint by ID
+    const complaint = await Complaint.findById(id);
     if (!complaint) {
-      return res.status(404).json({ success: false, message: "Complaint not found or unauthorized" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Complaint not found" });
     }
 
+    // Apply updates
     if (description) {
       if (description.trim().length === 0) {
-        return res.status(400).json({ success: false, message: "Description cannot be empty" });
+        return res
+          .status(400)
+          .json({ success: false, message: "Description cannot be empty" });
       }
       complaint.description = description.trim();
     }
@@ -116,12 +139,17 @@ export const updateComplaint = async (req: Request, res: Response) => {
     }
 
     if (type) {
-      if (!["Enroll", "Withdraw", "Completion", "Other", "All"].includes(type)) {
-        return res.status(400).json({ success: false, message: "Invalid complaint type" });
+      if (
+        !["Enroll", "Withdraw", "Completion", "Other", "All"].includes(type)
+      ) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid complaint type" });
       }
       complaint.type = type;
     }
 
+    // Save the updated complaint
     await complaint.save();
 
     res.status(200).json({ success: true, complaint });
@@ -141,11 +169,15 @@ export const deleteComplaint = async (req: Request, res: Response) => {
   try {
     const complaint = await Complaint.findByIdAndDelete(id);
     if (!complaint) {
-      return res.status(404).json({ success: false, message: "Complaint not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Complaint not found" });
     }
 
-    res.status(200).json({ success: true, message: "Complaint deleted successfully" });
-  }catch (error: unknown) {
+    res
+      .status(200)
+      .json({ success: true, message: "Complaint deleted successfully" });
+  } catch (error: unknown) {
     if (error instanceof Error) {
       res.status(500).json({ success: false, error: error.message });
     } else {

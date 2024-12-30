@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { User } from "../models/user.model.js"; // Correct import for named export
-import bcrypt from "bcryptjs";
+import Portfolio from "../models/portfolio.models.js";
 
 export const login = async (req: Request, res: Response) => {
   try {
@@ -9,14 +9,16 @@ export const login = async (req: Request, res: Response) => {
 
     // Validate input
     if (!email || !password) {
-      return res.status(400).json({ message: "Email and password are required" });
+      return res
+        .status(400)
+        .json({ message: "Email and password are required" });
     }
 
-     // Find user
-     const user = await User.findOne({ email });
-     if (!user) {
-       return res.status(401).json({ message: "Invalid credentials" });
-     }
+    // Find user
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
 
     // Check password (using the model's comparePassword method)
     const isMatch = await user.comparePassword(password);
@@ -34,6 +36,7 @@ export const login = async (req: Request, res: Response) => {
     const userData = {
       id: user._id,
       email: user.email,
+      username: user.username,
       firstName: user.firstName,
       lastName: user.lastName,
       role: user.role,
@@ -51,7 +54,17 @@ export const login = async (req: Request, res: Response) => {
 
 export const register = async (req: Request, res: Response) => {
   try {
-    const { email, password, firstName, lastName, role } = req.body;
+    const {
+      email,
+      password,
+      username,
+      firstName,
+      lastName,
+      role,
+      portfolioUrl,
+      bio,
+      skills,
+    } = req.body;
 
     // Check if user exists
     const existingUser = await User.findOne({ email });
@@ -59,18 +72,24 @@ export const register = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "User already exists" });
     }
 
+    // Check if username exists
+    if (username) {
+      const existingUsername = await User.findOne({ username });
+      if (existingUsername) {
+        return res.status(400).json({ message: "Username already taken" });
+      }
+    }
+
     // Validate role
-    if (!["admin", "student", "instructor"].includes(role)) {
+    if (!["admin", "student", "instructor", "portfolio"].includes(role)) {
       return res.status(400).json({ message: "Invalid role specified" });
     }
 
-    // // Hash password
-    // const hashedPassword = await bcrypt.hash(password, 10);
-
-     // Create base user data
-     const userData: any = {
+    // Create user
+    const userData: any = {
       email,
       password,
+      username,
       firstName,
       lastName,
       role,
@@ -78,6 +97,17 @@ export const register = async (req: Request, res: Response) => {
     const user = new User(userData);
     await user.save();
 
+    // Create portfolio if portfolio details are provided
+    if (portfolioUrl || bio || skills) {
+      const portfolio = new Portfolio({
+        user: user._id,
+        portfolioUrl,
+        bio,
+        skills,
+        published: false, // Default to unpublished
+      });
+      await portfolio.save();
+    }
 
     // Generate JWT
     const token = jwt.sign(
@@ -89,6 +119,7 @@ export const register = async (req: Request, res: Response) => {
     const responseData = {
       id: user._id,
       email: user.email,
+      username: user.username,
       firstName: user.firstName,
       lastName: user.lastName,
       role: user.role,
@@ -106,25 +137,3 @@ export const register = async (req: Request, res: Response) => {
     });
   }
 };
-
-// export const requestPasswordReset = async (req: Request, res: Response) => {
-//   try {
-//     const { email } = req.body;
-//     const { resetToken, user } = await generateResetToken(email);
-//     const resetLink = `http://localhost:3000/reset-password?token=${resetToken}`;
-//     await sendResetPasswordEmail(user.email);
-//     res.status(200).json({ message: "Password reset email sent" });
-//   } catch (error: any) {
-//     res.status(400).json({ message: error.message });
-//   }
-// };
-
-// export const resetPassword = async (req: Request, res: Response) => {
-//   try {
-//     const { token, newPassword } = req.body;
-//     await resetUserPassword(token, newPassword);
-//     res.status(200).json({ message: "Password reset successful" });
-//   } catch (error: any) {
-//     res.status(400).json({ message: error.message });
-//   }
-// };

@@ -26,7 +26,12 @@ import {
 // Configure multer for profile photos
 // const profileUpload = configureMulter("profile_photos");
 
-import { viewCourses, withdrawFromCourse, viewEnrolledCourses } from "../controllers/course.controller.js"
+import {
+  viewCourses,
+  withdrawFromCourse,
+  viewEnrolledCourses,
+  playCourse,
+} from "../controllers/course.controller.js";
 const router = express.Router();
 
 // Student profile routes
@@ -65,7 +70,6 @@ router.put(
 //   // submitLeave
 // );
 
-
 router.get(
   "/complaint",
   authenticateToken,
@@ -97,7 +101,6 @@ router.get(
   withdrawFromCourse
 );
 
-
 // All Enrolled Courses route
 router.get(
   "/mycourses",
@@ -106,27 +109,31 @@ router.get(
   viewEnrolledCourses
 );
 
+// Play Courses route
+router.get(
+  "/play/:courseId",
+  authenticateToken,
+  authorizeRoles(["student"]),
+  playCourse
+);
+
 // Complaint routes
 router.post(
-  "/complaint",
+  "/complaints", // Changed from /complaint to /complaints for consistency
   authenticateToken,
   authorizeRoles(["student"]),
   createComplaint
 );
+
 router.patch(
-  "/complaint-update/:id",
+  "/complaints/:id", // Changed from complaint-update/:id
   authenticateToken,
   authorizeRoles(["student"]),
   updateComplaint
 );
-router.get(
-  "/complaint",
-  authenticateToken,
-  authorizeRoles(["student"]),
-  getStudentComplaints
-);
+
 router.delete(
-  "/complaint/:id",
+  "/complaints/:id", // Changed from complaint/:id
   authenticateToken,
   authorizeRoles(["student"]),
   deleteStudentComplaint
@@ -136,7 +143,7 @@ router.delete(
 router.post(
   "/upload-profile-pic",
   authenticateToken,
-  authorizeRoles(["student"]),
+  authorizeRoles(["student"])
   // profileUpload.single("profilePic"), // Use the configured profileUpload middleware
   // uploadProfilePicture
 );
@@ -146,7 +153,7 @@ router.post(
 router.get(
   "/mess-menu",
   authenticateToken,
-  authorizeRoles(["student"]),
+  authorizeRoles(["student"])
   // getMessPhoto
 );
 

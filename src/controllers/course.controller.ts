@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import Course from "../models/course.model.js";
 import { User } from "../models/user.model.js";
 import mongoose, { Schema } from "mongoose";
+import { PlayCourseResponse } from '../types/course.types.js';
 
 // ================== Student Course Actions ==================
 
@@ -165,6 +166,151 @@ export const viewCourses = async (req: Request, res: Response) => {
   }
 };
 
+// Play Course (Students can access and play course content)
+export const playCourse = async (req: Request, res: Response<PlayCourseResponse>) => {
+  const studentId = req.user?._id;
+
+  if (!studentId || typeof studentId !== 'string') {
+    return res.status(400).json({ 
+      success: false, 
+      message: "Student not authenticated" 
+    });
+  }
+
+  const { courseId } = req.params;
+
+  if (!courseId || !mongoose.Types.ObjectId.isValid(courseId)) {
+    return res.status(400).json({ 
+      success: false, 
+      message: "Invalid or missing course ID" 
+    });
+  }
+
+  try {
+    const course = await Course.findById(courseId)
+      .select("title description courseCode modules students")
+      .lean(); // Use lean() for better performance
+
+    if (!course) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Course not found" 
+      });
+    }
+
+    // Check enrollment
+    if (!course.students.some(student => student.toString() === studentId)) {
+      return res.status(403).json({ 
+        success: false, 
+        message: "You are not enrolled in this course" 
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Course content retrieved successfully",
+      course: {
+        title: course.title,
+        description: course.description,
+        courseCode: course.courseCode as string,
+        modules: course.modules.map(module => ({
+          title: module.title,
+          resourceLink: module.resourceLink,
+        })),
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error instanceof Error ? error.message : "Unexpected error"
+    });
+  }
+};
+
+// Update Progress (Students can update their progress in a course)
+export const updateProgress = async (req: Request, res: Response) => {
+  const studentId = req.user?._id; // Student's ID from the authenticated user context
+  const { courseId, progress, lastPlayedModule } = req.body;
+
+  // Validate studentId and courseId
+  if (!studentId || !mongoose.Types.ObjectId.isValid(studentId)) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid or missing student ID",
+    });
+  }
+
+  if (!courseId || !mongoose.Types.ObjectId.isValid(courseId)) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid or missing course ID",
+    });
+  }
+
+  // Validate progress
+  if (typeof progress !== "number" || progress < 0 || progress > 100) {
+    return res.status(400).json({
+      success: false,
+      message: "Progress must be a number between 0 and 100",
+    });
+  }
+
+  try {
+    const course = await Course.findById(courseId);
+
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found",
+      });
+    }
+
+    // Check if the student is enrolled in the course
+    const isEnrolled = course.students.some((student) =>
+      student.toString() === studentId
+    );
+
+    if (!isEnrolled) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not enrolled in this course",
+      });
+    }
+
+    // Find the student's progress entry
+    const progressIndex = course.progress.findIndex(
+      (entry) => entry.student.toString() === studentId
+    );
+
+    if (progressIndex >= 0) {
+      // Update existing progress
+      course.progress[progressIndex].progress = progress;
+      course.progress[progressIndex].lastPlayedModule = lastPlayedModule || null;
+    } else {
+      // Add new progress entry
+      course.progress.push({
+        student: new mongoose.Types.ObjectId(studentId),  // Ensure this is an ObjectId
+        progress,
+        lastPlayedModule: lastPlayedModule || null,
+      });
+    }
+
+    // Save the updated course
+    await course.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Progress updated successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : "Unexpected error",
+    });
+  }
+};
+
+
 
 // ================== Instructor Course Actions ==================
 
@@ -216,7 +362,6 @@ export const createCourse = async (req: Request, res: Response) => {
     }
   }
 };
-
 
 // View Teacher's Created Courses (Instructor view their own courses)
 export const viewTeacherCourses = async (req: Request, res: Response) => {
