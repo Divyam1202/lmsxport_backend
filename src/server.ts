@@ -13,7 +13,7 @@ const app = express();
 // app.use(cors());
 app.use(
   cors({
-    origin: "https://lmsxport-frontend-git-main-dcviits-projects.vercel.app",
+    origin: "https://lmsxport-frontend.vercel.app/",
     credentials: true,
   })
 );
