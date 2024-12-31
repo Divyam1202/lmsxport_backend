@@ -5,12 +5,6 @@ const router = express.Router();
 // Public routes
 router.post("/login", login);
 router.post("/register", register);
-//////////////////////////////
-// router.post("/login", login);
-// router.post("/register", register);
-// router.post('/parent/login', parentLogin);
-// router.post('/parent/register', parentRegister);
-//////////////////////////////
 // Protected routes for specific roles
 router.get("/protected-admin", authenticateToken, authorizeRoles(["admin"]), (req, res) => {
     res.json({ message: "Welcome, Admin!" });
