@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import authRoutes from "./routes/auth.routes.js";
+import http from "http";
 
 // Configure dotenv
 dotenv.config();
@@ -43,7 +44,8 @@ app.use(
   }
 );
 
-const PORT = parseInt(process.env.PORT || "5000", 10);
-app.listen(PORT, "0.0.0.0", () => {
+const PORT = process.env.PORT || "5000";
+const server = http.createServer(app);
+server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
